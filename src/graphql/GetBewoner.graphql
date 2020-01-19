@@ -1,0 +1,10 @@
+query bewoner($bewonerId: String!) {
+    bewoner(bewonerId: $bewonerId) {
+        _id
+        name
+        description
+        moveInDate
+        moveOutDate
+        profilePicture
+    }
+}

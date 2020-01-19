@@ -1,0 +1,14 @@
+query getUser($userId: String!){
+    user(userId: $userId) {
+        _id
+        email
+        bewoner {
+            _id
+            name
+            description
+            moveInDate
+            moveOutDate
+            profilePicture
+        }
+    }
+}

@@ -1,0 +1,10 @@
+mutation createBewoner($bewonerInput: BewonerInput!) {
+    createBewoner(bewonerInput: $bewonerInput) {
+        _id
+        name
+        description
+        moveInDate
+        moveOutDate
+        profilePicture
+    }
+}

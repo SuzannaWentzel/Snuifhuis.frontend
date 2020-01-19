@@ -1,0 +1,10 @@
+mutation editBewoner($bewonerInput: BewonerInput!) {
+    editBewoner(bewonerInput: $bewonerInput) {
+        _id
+        name
+        description
+        moveInDate
+        moveOutDate
+        profilePicture
+    }
+}

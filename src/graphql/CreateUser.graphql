@@ -1,0 +1,16 @@
+mutation createUser($userInput: UserInput!) {
+    createUser(userInput: $userInput) {
+        user {
+            _id
+            bewoner {
+                _id
+                name
+                description
+                moveInDate
+                moveOutDate
+            }
+        }
+        token
+        tokenExpiration
+    }
+}

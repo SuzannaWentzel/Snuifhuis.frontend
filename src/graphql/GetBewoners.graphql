@@ -1,0 +1,8 @@
+query bewoners {
+    bewoners {
+        name
+        description
+        moveOutDate
+        profilePicture
+    }
+}

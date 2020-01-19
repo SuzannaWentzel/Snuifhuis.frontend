@@ -1,0 +1,9 @@
+mutation editEmail($email: String!) {
+    editEmail(email: $email){
+        user {
+            _id
+            email
+        }
+        token
+    }
+}
