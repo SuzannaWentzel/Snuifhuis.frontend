@@ -5,6 +5,8 @@ mutation createBewoner($bewonerInput: BewonerInput!) {
         description
         moveInDate
         moveOutDate
-        profilePicture
+        profilePicture {
+            picture
+        }
     }
 }

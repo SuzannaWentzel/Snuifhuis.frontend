@@ -5,6 +5,8 @@ query bewoner($bewonerId: String!) {
         description
         moveInDate
         moveOutDate
-        profilePicture
+        profilePicture {
+            picture
+        }
     }
 }

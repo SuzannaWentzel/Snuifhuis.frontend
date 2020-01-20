@@ -18,15 +18,20 @@
 				</div>
 				<div v-if="step === 1" class="content">
 					<h3 class="step-description"><b>Stap 2:</b> Upload een mooie profielfoto</h3>
-					<div class="image">
+					<div v-if="!profilePicture" class="image">
 						<i class="fas fa-user-circle"></i>
 					</div>
+					<div v-if="!!profilePicture" class="image" :style="'background-image: url(\'' + computedPicture + '\');'"></div>
 					<b-form-file
 						v-model="profilePicture"
 						placeholder="Kies of sleep hier jouw profielfoto..."
 						drop-placeholder="Plaats je profielfoto hier..."
 						accept="image/jpeg, image/png"
+						:state="fileValidation"
 					></b-form-file>
+					<b-form-invalid-feedback :state="fileValidation">
+						Dit bestand is te groot... Kies een bestand < 1mB
+					</b-form-invalid-feedback>
 				</div>
 				<div v-if="step === 2" class="content content-container">
 					<h3 class="step-description"><b>Stap 3:</b> Geef aan wanneer je ingetrokken bent</h3>
@@ -101,19 +106,30 @@
 	             moveInDate: null,
 	             movedOut: false,
 	             movedOutDate: null,
-	             message: ''
+				 message: '',
+				 computedPicture: null
             }
-	     },
+		 },
+		 watch: {
+			 'profilePicture': async function (val, preVal) {
+				 if (!!val) {
+					this.computedPicture = val? await this.readFileAsDataURL(val) : null;
+				 }
+			 }
+		 },
 	     computed: {
 				token() {
 					 return localStorage.getItem('Authorization');
 				},
 		      userId() {
 				    return localStorage.getItem('userId');
-		      }
+			  },
+			  fileValidation() {
+				  return (!this.profilePicture || this.profilePicture.size < 1000*1000);
+			  }
 	     },
         async mounted() {
-            this.$refs['welcome-modal'].show()
+			this.$refs['welcome-modal'].show();
         },
 	     async created() {
             await this.$apollo.query({
@@ -150,6 +166,14 @@
 		      },
 		      async saveBewoner() {
                 if (!!this.name && !!this.moveInDate && ((this.movedOut && !!this.movedOutDate) || (!this.movedOut))) {
+					let base64Picture = null;
+					if (!!this.profilePicture) {
+						if (this.profilePicture.size > 1000*1000) {
+							console.error('File too big!');
+							return;
+						}
+						base64Picture = this.computedPicture;
+					}
                     await this.$apollo.mutate({
                         mutation: createBewoner,
                         variables: {
@@ -157,11 +181,11 @@
                                 name: this.name,
                                 description: this.description,
                                 moveInDate: this.moveInDate,
-                                moveOutDate: this.movedOutDate
+								moveOutDate: this.movedOutDate,
+								profilePicture: base64Picture
                             }
                         }
                     }).then((response) => {
-                        console.log(response.data.createBewoner);
                         this.setBewoner({
 	                         bewoner: response.data.createBewoner
                         });
@@ -175,7 +199,16 @@
 		      },
 		      toLogin() {
                 this.$router.push('/login');
-		      },
+			  },
+			  async readFileAsDataURL(file) {
+                let result_base64 = await new Promise((resolve) => {
+                    let fileReader = new FileReader();
+                    fileReader.onload = (e) => resolve(fileReader.result);
+                    fileReader.readAsDataURL(file);
+                });
+
+                return result_base64;
+			},
 		      ...mapMutations(['setBewoner'])
 	     }
     }
@@ -311,6 +344,8 @@
 		color: white;
 		font-size: 7rem;
 		position: relative;
+		background-position: center;
+		background-size: cover;
 
 		& i {
 			position: absolute;

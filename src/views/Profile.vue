@@ -20,7 +20,7 @@
 					<h2 class="settings-title">Profiel aanpassen</h2>
 					<hr>
 					<b-form-group class="custom-label" label-cols="3" label-cols-sm="12" label-cols-lg="4">
-						<div ref="profile-picture" class="profile-picture" :style="'background-image: url(\'' + bewoner.profilePicture + '\');'"></div>
+						<div ref="profile-picture" class="profile-picture" :style="'background-image: url(\'' + bewoner.profilePicture.picture + '\');'"></div>
 					</b-form-group>
 
 					<b-form-group class="custom-label" label-cols="3" label-cols-sm="12" label-cols-lg="4" label="Profielfoto: " label-for="input-picture">
@@ -142,7 +142,6 @@
 					let activeElement = document.getElementById(tab);
 					activeElement.classList.add('active');
             },
-
             resetClasses() {
                 let elements = document.getElementsByClassName('tab');
                 for (let element of elements) {
@@ -158,39 +157,19 @@
 
                 return result_base64;
             },
-
 		      async saveBewoner() {
                 this.saveBewonerOk = false;
                 this.saveBewonerNotOk = false;
 
-                console.log(this.profilePicture);
                 let base64Picture = null;
                 if (!!this.profilePicture) {
-                    console.log(this.profilePicture.size);
                     if (this.profilePicture.size > 1000 * 1000) {
                         console.log('File too big!');
                         return;
                     }
                     base64Picture = await this.readFileAsDataURL(this.profilePicture);
-
-
-                    // const reader = new FileReaderSync();
-                    // console.log(reader.readAsDataURL(this.profilePicture));
-                    // console.log('Result', reader.result);
-                    // reader.onload = function () {
-                    //     const readerResult = reader.result;
-                    //     base64Picture = readerResult.replace(/^data:image.+;base64,/, '');
-                    //     console.log(base64Picture);
-                    // };
-                    // reader.onerror = function (err) {
-                    //     console.err(err);
-                    // };
-
-                    // console.log(base64Picture)
-                }
-
-                // console.log(base64Picture);
-
+				}
+				
                 let bewonerInput = {
                     _id: this.bewoner._id,
                     name: this.bewoner.name,
@@ -200,18 +179,16 @@
 	                 profilePicture: base64Picture
 			       };
 
-
                 await this.$apollo.mutate({
                     mutation: editBewoner,
                     variables: {
                         bewonerInput: bewonerInput
                     }
                 }).then(async (response) => {
-                    console.log(response.data.editBewoner);
                     this.bewoner = response.data.editBewoner;
                     this.saveBewonerOk = true;
                 }).catch((error) => {
-							this.saveBewonerNotOk = true;
+					this.saveBewonerNotOk = true;
                 });
 		      },
 		      async saveEmail() {
