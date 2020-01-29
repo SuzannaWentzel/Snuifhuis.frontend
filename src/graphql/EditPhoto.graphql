@@ -1,0 +1,9 @@
+mutation editPhoto($photoInput: PhotoInput!) {
+    editPhoto(photoInput: $photoInput) {
+        _id
+        description
+        picture
+        fwos
+        private
+    }
+}

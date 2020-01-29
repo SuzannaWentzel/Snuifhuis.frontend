@@ -1,0 +1,9 @@
+query getFwosPhotos($bewonerId: String) {
+    fwosPhotos(bewonerId: $bewonerId) {
+        _id
+        picture
+        description
+        fwos
+        private
+    }
+}

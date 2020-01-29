@@ -8,7 +8,9 @@ query getUser($userId: String!){
             description
             moveInDate
             moveOutDate
-            profilePicture
+            profilePicture {
+                picture
+            }
         }
     }
 }

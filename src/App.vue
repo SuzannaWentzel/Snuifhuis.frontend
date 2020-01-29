@@ -9,9 +9,6 @@
   import Vue from 'vue'
   import BootstrapVue from 'bootstrap-vue';
   import VCalendar from 'v-calendar';
-  import 'bootstrap/dist/css/bootstrap.css';
-  import 'bootstrap-vue/dist/bootstrap-vue.css';
-
 
   Vue.use(BootstrapVue);
   Vue.use(VCalendar);
@@ -39,6 +36,11 @@
 </script>
 
 <style lang="scss">
+@import 'assets/custom-vars.scss';
+// @import '../node_modules/bootstrap/dist/css/bootstrap.css';
+// @import '../node_modules/bootstrap-vue/dist/bootstrap-vue.css';
+@import '~bootstrap/scss/bootstrap.scss';
+@import '~bootstrap-vue/src/index.scss';
   * {
     padding: 0;
     margin: 0;
