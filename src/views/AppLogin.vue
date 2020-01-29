@@ -97,7 +97,7 @@
                         let token = response.data.createUser.token;
                         let userId = response.data.createUser.user._id;
                         let bewoner = response.data.createUser.user.bewoner;
-                        localStorage.setItem('userId', userId);
+                        await localStorage.setItem('userId', userId);
 
                         // this.setToken({
                         //     token: token

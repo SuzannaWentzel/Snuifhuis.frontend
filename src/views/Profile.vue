@@ -16,38 +16,7 @@
 				</div>
 			</div>
 			<div class="content-container">
-				<div v-if="tab === 'personal' && !!bewoner" class="content">
-					<h2 class="settings-title">Profiel aanpassen</h2>
-					<hr>
-					<b-form-group class="custom-label" label-cols="3" label-cols-sm="12" label-cols-lg="4">
-						<div ref="profile-picture" class="profile-picture" :style="'background-image: url(\'' + bewoner.profilePicture.picture + '\');'"></div>
-					</b-form-group>
-
-					<b-form-group class="custom-label" label-cols="3" label-cols-sm="12" label-cols-lg="4" label="Profielfoto: " label-for="input-picture">
-						<b-form-file
-							id="input-picture"
-							placeholder="Kies of sleep hier jouw profielfoto..."
-							drop-placeholder="Plaats je profielfoto hier..."
-							v-model="profilePicture"
-							accept="image/jpeg, image/png"
-							:state="fileValidation"
-						></b-form-file>
-						<b-form-invalid-feedback :state="fileValidation">
-							Dit bestand is te groot... Kies een bestand < 1mB
-						</b-form-invalid-feedback>
-					</b-form-group>
-					<b-form-group class="custom-label" label-cols="3" label-cols-lg="4" label-cols-sm="12" label="Naam: " label-for="input-name">
-						<b-form-input id="input-name" type="text" v-model="bewoner.name"></b-form-input>
-					</b-form-group>
-					<b-form-group class="custom-label" label-cols="3" label-cols-lg="4" label-cols-sm="12" label="Beschrijving: " label-for="input-description">
-						<b-form-textarea no-resize id="input-description" type="text" v-model="bewoner.description"></b-form-textarea>
-					</b-form-group>
-					<b-form-group class="custom-label" label-cols="3" label-cols-lg="4" label-cols-sm="12">
-						<template v-if="saveBewonerOk" slot="label" label-for="btn-save-profile"><span class="text-success"><i class="far fa-thumbs-up"></i> Opgeslagen!</span></template>
-						<template v-if="saveBewonerNotOk" slot="label" label-for="btn-save-profile"><span class="text-danger"><i class="far fa-sad-cry"></i> Mislukt!</span></template>
-						<b-button id="btn-save-profile" variant="outline-success" class="btn-long" @click="saveBewoner()">Profiel bijwerken</b-button>
-					</b-form-group>
-				</div>
+				<ProfileSettings v-if="tab === 'personal' && !!bewoner" :bewoner="bewoner" @updateBewoner="updateBewoner"/>
 				<div v-if="tab === 'security'" class="content">
 					<h2 class="settings-title">Verander inloggegevens</h2>
 					<hr>
@@ -58,7 +27,7 @@
 						<b-form-group class="custom-label" label-cols="3" label-cols-lg="4" label-cols-sm="12">
 							<template v-if="saveEmailOk" slot="label" label-for="btn-save-email"><span class="text-success"><i class="far fa-thumbs-up"></i> Opgeslagen!</span></template>
 							<template v-if="saveEmailNotOk" slot="label" label-for="btn-save-email"><span class="text-danger"><i class="far fa-sad-cry"></i> Mislukt!</span></template>
-							<b-button id="btn-save-email" variant="outline-success" class="btn-long" @click="saveEmail()">Sla emailadres op</b-button>
+							<b-button id="btn-save-email" variant="outline-primary" class="btn-long" @click="saveEmail()">Sla emailadres op</b-button>
 						</b-form-group>
 					</b-form-group>
 					<b-form-group>
@@ -74,7 +43,7 @@
 						<b-form-group class="custom-label" label-cols="3" label-cols-lg="4" label-cols-sm="12">
 							<template v-if="savePassOk" slot="label" label-for="btn-save-pass"><span class="text-success"><i class="far fa-thumbs-up"></i> Opgeslagen!</span></template>
 							<template v-if="savePassNotOk" slot="label" label-for="btn-save-pass"><span class="text-danger"><i class="far fa-sad-cry"></i> Mislukt!</span></template>
-							<b-button id="btn-save-pass" variant="outline-success" class="btn-long" @click="savePassword()">Sla wachtwoord op</b-button>
+							<b-button id="btn-save-pass" variant="outline-primary" class="btn-long" @click="savePassword()">Sla wachtwoord op</b-button>
 						</b-form-group>
 					</b-form-group>
 				</div>
@@ -94,191 +63,158 @@
 						</div>
 					</b-modal>
 				</div>
-				<div v-if="tab === 'photos'">
-					PHOTOS
-				</div>
+				<PhotosOverview v-if="tab === 'photos'" :bewoner="bewoner"/>
 			</div>
 		</div>
 	</div>
 </template>
 
 <script>
-    import editBewoner from '../graphql/EditBewoner.graphql';
     import getBewoner from '../graphql/GetBewoner.graphql';
     import getUser from '../graphql/GetUser.graphql';
     import editEmail from '../graphql/EditEmail.graphql';
     import editPassword from '../graphql/EditPassword.graphql';
-    import removeUser from '../graphql/RemoveUser.graphql';
+	 import removeUser from '../graphql/RemoveUser.graphql';
     import {onLogin, onLogout} from "../vue-apollo";
+    import ProfileSettings from '../components/profile/ProfileSettings';
+    import PhotosOverview from '../components/profile/PhotosOverview';
 
     export default {
         name: "Profile",
-	     data () {
-            return {
-                tab: 'personal',
-	             bewoner: this.$store.state.bewoner? this.$store.state.bewoner.bewoner : null,
-	             saveBewonerOk: false,
-	             saveBewonerNotOk: false,
-	             saveEmailOk: false,
-	             saveEmailNotOk: false,
-	             user: {
-                    email: ""
-	             },
-	             oldPass: null,
-	             newPass1: null,
-	             newPass2: null,
-	             allFieldsFilledIn: true,
-	             passwordsTheSame: true,
-	             savePassOk: false,
-	             savePassNotOk: false,
-	             removeNotOk: false,
-	             profilePicture: null,
-	         }
-	     },
-	     methods: {
-            selectTab(tab) {
-					this.tab = tab;
-					this.resetClasses();
-					let activeElement = document.getElementById(tab);
-					activeElement.classList.add('active');
-            },
-            resetClasses() {
-                let elements = document.getElementsByClassName('tab');
-                for (let element of elements) {
-                    element.className = 'tab';
-                }
-            },
-            async readFileAsDataURL(file) {
-                let result_base64 = await new Promise((resolve) => {
-                    let fileReader = new FileReader();
-                    fileReader.onload = (e) => resolve(fileReader.result);
-                    fileReader.readAsDataURL(file);
-                });
+        components: {
+            PhotosOverview,
+            ProfileSettings,
+        },
+		data () {
+			return {
+				tab: 'personal',
+				bewoner: this.$store.state.bewoner? this.$store.state.bewoner.bewoner : null,
+				saveBewonerOk: false,
+				saveBewonerNotOk: false,
+				saveEmailOk: false,
+				saveEmailNotOk: false,
+				user: {
+					email: ""
+				},
+				oldPass: null,
+				newPass1: null,
+				newPass2: null,
+				allFieldsFilledIn: true,
+				passwordsTheSame: true,
+				savePassOk: false,
+				savePassNotOk: false,
+				removeNotOk: false,
+			}
+		},
 
-                return result_base64;
-            },
-		      async saveBewoner() {
-                this.saveBewonerOk = false;
-                this.saveBewonerNotOk = false;
-
-                let base64Picture = null;
-                if (!!this.profilePicture) {
-                    if (this.profilePicture.size > 1000 * 1000) {
-                        console.log('File too big!');
-                        return;
-                    }
-                    base64Picture = await this.readFileAsDataURL(this.profilePicture);
+		methods: {
+			selectTab(tab) {
+				this.tab = tab;
+				this.resetClasses();
+				let activeElement = document.getElementById(tab);
+				activeElement.classList.add('active');
+			},
+			resetClasses() {
+				let elements = document.getElementsByClassName('tab');
+				for (let element of elements) {
+					element.className = 'tab';
 				}
-				
-                let bewonerInput = {
-                    _id: this.bewoner._id,
-                    name: this.bewoner.name,
-	                 description: this.bewoner.description,
-	                 moveInDate: this.bewoner.moveInDate,
-	                 moveOutDate: this.bewoner.moveOutDate,
-	                 profilePicture: base64Picture
-			       };
+			},
+			async readFileAsDataURL(file) {
+				let result_base64 = await new Promise((resolve) => {
+					let fileReader = new FileReader();
+					fileReader.onload = (e) => resolve(fileReader.result);
+					fileReader.readAsDataURL(file);
+				});
 
-                await this.$apollo.mutate({
-                    mutation: editBewoner,
-                    variables: {
-                        bewonerInput: bewonerInput
-                    }
-                }).then(async (response) => {
-                    this.bewoner = response.data.editBewoner;
-                    this.saveBewonerOk = true;
-                }).catch((error) => {
-					this.saveBewonerNotOk = true;
-                });
-		      },
-		      async saveEmail() {
-                this.saveEmailNotOk = false;
-                this.saveEmailOk = false;
-					if (!!this.user.email) {
-					    await this.$apollo.mutate({
-						     mutation: editEmail,
-						     variables: {
-						         email: this.user.email
-						     }
-					    }).then(async response => {
-					        this.saveEmailOk = true;
-					        this.user = response.data.editEmail.user;
-					        onLogin(this.$apollo.getClient(), response.data.editEmail.token);
-					    }).catch(error => {
-					        console.error(error);
-					        this.saveEmailNotOk = true;
-					    })
+				return result_base64;
+			},
+			 updateBewoner(bewoner) {
+			    this.bewoner = bewoner;
+			 },
+			async saveEmail() {
+				this.saveEmailNotOk = false;
+				this.saveEmailOk = false;
+				if (!!this.user.email) {
+					await this.$apollo.mutate({
+						mutation: editEmail,
+						variables: {
+							email: this.user.email
+						}
+					}).then(async response => {
+						this.saveEmailOk = true;
+						this.user = response.data.editEmail.user;
+						onLogin(this.$apollo.getClient(), response.data.editEmail.token);
+					}).catch(error => {
+						console.error(error);
+						this.saveEmailNotOk = true;
+					});
+				}
+			},
+			async savePassword() {
+				this.savePassOk = false;
+				this.savePassNotOk = false;
+				if (!this.oldPass || !this.newPass1 || !this.newPass2) {
+					this.allFieldsFilledIn = false;
+				} else if (this.newPass1 !== this.newPass2) {
+					this.passwordsTheSame = false;
+				} else {
+					await this.$apollo.mutate({
+						mutation: editPassword,
+						variables: {
+							oldPassword: this.oldPass,
+							newPassword: this.newPass2
+						}
+					}).then(response => {
+						console.log(response.data.editPassword);
+						this.savePassOk= true;
+					}).catch(error => {
+						console.error(error);
+						this.savePassNotOk = true;
+					});
+				}
+			},
+			deleteAccount() {
+				this.$apollo.mutate({
+					mutation: removeUser,
+					variables: {
+						userId: this.user._id
 					}
-		      },
-		      async savePassword() {
-             this.savePassOk = false;
-		       this.savePassNotOk = false;
-					if (!this.oldPass || !this.newPass1 || !this.newPass2) {
-					    this.allFieldsFilledIn = false;
-					} else if (this.newPass1 !== this.newPass2) {
-					    this.passwordsTheSame = false;
-					} else {
-					    await this.$apollo.mutate({
-						     mutation: editPassword,
-						     variables: {
-						         oldPassword: this.oldPass,
-							      newPassword: this.newPass2
-						     }
-					    }).then(response => {
-					        console.log(response.data.editPassword);
-					        this.savePassOk= true;
-					    }).catch(error => {
-					        console.error(error);
-					        this.savePassNotOk = true;
-					    })
+				}).then(async response => {
+					console.log(response);
+					await onLogout(this.$apollo.getClient());
+					this.$router.push('/');
+				}).catch(error => {
+					console.error(error);
+				});
+			},
+			openModal() {
+				this.$refs['remove-modal'].show();
+			},
+			closeModal() {
+				this.$refs['remove-modal'].hide();
+			},
+		},
+		async created() {
+			if (!!localStorage.getItem('userId')) {
+				await this.$apollo.query({
+					query: getUser,
+					variables: {
+						userId: localStorage.getItem('userId')
 					}
-		      },
-		      deleteAccount() {
-			       this.$apollo.mutate({
-				        mutation: removeUser,
-				        variables: {
-				            userId: this.user._id
-				        }
-			       }).then(async response => {
-			           console.log(response);
-			           await onLogout(this.$apollo.getClient());
-			           this.$router.push('/');
-			       }).catch(error => {
-			           console.error(error);
-			       });
-		      },
-		      openModal() {
-                this.$refs['remove-modal'].show()
-		      },
-		      closeModal() {
-                this.$refs['remove-modal'].hide()
-		      }
-	     },
-	     async created() {
-            if (!!localStorage.getItem('userId')) {
-                await this.$apollo.query({
-                    query: getUser,
-                    variables: {
-                        userId: localStorage.getItem('userId')
-                    }
-                }).then(async response => {
-                    this.user = response.data.user;
-                    if (!this.bewoner && !response.data.user.bewoner) {
-                        this.$router.push('/bewoner');
-                    }
-                    if (!this.bewoner) {
-                        this.bewoner = response.data.user.bewoner;
-                    }
-                }).catch((error) => {
-                    console.error(error);
-                });
-            }
-	     },
-	     computed: {
-            fileValidation() {
-                return (!this.profilePicture || this.profilePicture.size < 1000*1000);
-            }
-	     }
+				}).then(async response => {
+					this.user = response.data.user;
+					if (!this.bewoner && !response.data.user.bewoner) {
+						this.$router.push('/bewoner');
+					}
+					if (!this.bewoner) {
+						this.bewoner = response.data.user.bewoner;
+					}
+				}).catch((error) => {
+					console.error(error);
+				});
+			}
+		}
     }
 </script>
 
@@ -363,7 +299,7 @@
 		height: 100%;
 		float: right;
 		display: flex;
-		padding: 0 3rem 0 6rem;
+		padding: 0 3rem 0 4rem;
 		/*justify-content: center;*/
 		/*flex-direction: column;*/
 		align-items: center;
@@ -382,18 +318,6 @@
 	.custom-label {
 		text-align: left;
 		width: 100%;
-	}
-
-	.profile-picture {
-		margin-top: 0.5rem;
-		max-width: 300px;
-		width: 98%;
-		margin-right: 2%;
-		height: 170px;
-		background-repeat: no-repeat;
-		background-position: center;
-		-webkit-background-size: cover;
-		background-size: cover;
 	}
 
 	.colour-button {
@@ -430,5 +354,4 @@
 		justify-content: space-between;
 		margin-top: 4rem;
 	}
-
 </style>

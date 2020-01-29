@@ -1,0 +1,9 @@
+mutation addPhotos($photoInputs: [PhotoInput!]!) {
+    createPhotos(photoInputs: $photoInputs) {
+        _id
+        picture
+        fwos
+        description
+        private
+    }
+}

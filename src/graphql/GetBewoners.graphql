@@ -3,6 +3,8 @@ query bewoners {
         name
         description
         moveOutDate
-        profilePicture
+        profilePicture {
+            picture
+        }
     }
 }

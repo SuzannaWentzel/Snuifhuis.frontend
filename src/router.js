@@ -8,10 +8,11 @@ Vue.use(Router);
 function loadView(view) {
   const userId = localStorage.getItem('userId');
   if (!userId && view !== 'Home') {
+    console.log('No user Id set...');
     view = 'AppLogin'
   }
   return () =>
-      import(`@/views/${view}.vue`);
+    import(`@/views/${view}.vue`);
 }
 
 export default new Router({

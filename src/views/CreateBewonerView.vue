@@ -341,7 +341,6 @@
 		height: 175px;
 		background-color: var(--gray-50);
 		margin-bottom: 2rem;
-		color: white;
 		font-size: 7rem;
 		position: relative;
 		background-position: center;

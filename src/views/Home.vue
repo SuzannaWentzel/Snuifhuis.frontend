@@ -46,6 +46,7 @@
   import BewonerBanner from "./BewonerBanner";
   import { GC_USER_ID, GC_AUTH_TOKEN } from '../constants/settings'
   import PhotoBanner from "../components/frontpage/PhotoBanner";
+  import { onLogout } from "../vue-apollo";
 
 
   export default {
@@ -53,84 +54,88 @@
   components: {
     PhotoBanner,
     BewonerBanner,
-    FrontBanner},
-    methods: {
-      showNav() {
-        let nav = document.getElementById("nav");
-        console.log(nav);
-
-        if (nav.className === "") {
-          nav.className += "responsive";
-        } else {
-          nav.className = "";
-        }
-      },
-      login() {
-        this.$router.push({name: 'login'});
-      },
-      logout() {
-        localStorage.removeItem(GC_USER_ID);
-        localStorage.removeItem(GC_AUTH_TOKEN);
-        this.$root.$data.userId = localStorage.getItem(GC_USER_ID);
-      },
-    },
-    computed: {
-      userId() {
-        return localStorage.getItem('userId');
-      }
-    },
-    mounted() {
-      console.log('Mounting home...')
-      let nav = document.getElementById('nav');
-      let stickyNavTop = nav.offsetTop;
-
-      function makeDark() {
-        let navBlocks = document.getElementsByClassName('nav-block');
-        for (let block of navBlocks) {
-          block.classList.add('not-white');
-        }
-
-        let loginIcon = document.getElementById('login-icon');
-        loginIcon.classList.add('not-white');
-      }
-
-      function removeDark() {
-        let navBlocks = document.getElementsByClassName('nav-block');
-        for (let block of navBlocks) {
-          block.classList.remove('not-white');
-        }
-
-        let loginIcon = document.getElementById('login-icon');
-        loginIcon.classList.remove('not-white');
-      }
-
-      let stickyNav = function(){
-        let bewonerbanner = document.getElementById('bewoner_banner');
-        let photosbanner = document.getElementById('photo-banner');
-        let bewonerTop = bewonerbanner.offsetTop;
-        let photosTop = photosbanner.offsetTop;
-        let nav = document.getElementById('nav');
-
-        let scrollTop = window.scrollY;
-        console.log(scrollTop);
-        console.log(bewonerTop);
-
-        if (scrollTop >= (bewonerTop - 100) && scrollTop <= (photosTop -100)){
-          makeDark();
-        } else {
-          removeDark();
-        }
-
-        if (scrollTop > stickyNavTop) {
-          console.log(nav.classList)
-          nav.classList.add('sticky');
-        } else {
-          nav.classList.remove('sticky');
-        }
-      };
-
-      window.addEventListener('scroll', stickyNav);
+    FrontBanner
+  },
+  data () {
+    return {
+      userId: localStorage.getItem('userId'),
     }
+  },
+  methods: {
+    showNav() {
+      let nav = document.getElementById("nav");
+      console.log(nav);
+
+      if (nav.className === "") {
+        nav.className += "responsive";
+      } else {
+        nav.className = "";
+      }
+    },
+    login() {
+      this.$router.push({name: 'login'});
+    },
+    async logout() {
+      await onLogout(this.$apollo.getClient());
+    },
+  },
+  computed: {
+    // userId() {
+    //   return localStorage.getItem('userId');
+    // }
+  },
+  mounted() {
+    console.log('Mounting home...')
+    let nav = document.getElementById('nav');
+    let stickyNavTop = nav.offsetTop;
+
+    function makeDark() {
+      let navBlocks = document.getElementsByClassName('nav-block');
+      for (let block of navBlocks) {
+        block.classList.add('not-white');
+      }
+
+      let loginIcon = document.getElementById('login-icon');
+      loginIcon.classList.add('not-white');
+    }
+
+    function removeDark() {
+      let navBlocks = document.getElementsByClassName('nav-block');
+      for (let block of navBlocks) {
+        block.classList.remove('not-white');
+      }
+
+      let loginIcon = document.getElementById('login-icon');
+      loginIcon.classList.remove('not-white');
+    }
+
+    let stickyNav = function(){
+      let bewonerbanner = document.getElementById('bewoner_banner');
+      let photosbanner = document.getElementById('photo-banner');
+      let bewonerTop = bewonerbanner.offsetTop;
+      let photosTop = photosbanner.offsetTop;
+      let nav = document.getElementById('nav');
+
+      let scrollTop = window.scrollY;
+      console.log(scrollTop);
+      console.log(bewonerTop);
+
+      if (scrollTop >= (bewonerTop - 100) && scrollTop <= (photosTop -100)){
+        makeDark();
+      } else {
+        removeDark();
+      }
+
+      if (scrollTop > stickyNavTop) {
+        console.log(nav.classList)
+        nav.classList.add('sticky');
+      } else {
+        nav.classList.remove('sticky');
+      }
+    };
+
+    window.addEventListener('scroll', stickyNav);
+  }
 };
 </script>
 

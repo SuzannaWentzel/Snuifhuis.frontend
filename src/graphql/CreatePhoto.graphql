@@ -1,0 +1,9 @@
+mutation addPhoto($photoInput: PhotoInput!) {
+    createPhoto(photoInput: $photoInput) {
+        _id
+        picture
+        fwos
+        description
+        private
+    }
+}
