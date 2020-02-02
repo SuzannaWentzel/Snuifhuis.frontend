@@ -1,7 +1,8 @@
 <template>
-	<div id="photo-banner">
+	<div :id="fwos? 'fwos-photo-banner' : 'photo-banner'" v-if="photos">
 		<div class="slide first" :class="determineClass(-1)">
-			<h1>Algemene <span class="highlighted">Foto's</span></h1>
+			<h1 v-if="fwos"><span class="highlighted">Food</span> Wall of Shame</h1>
+			<h1 v-else>Algemene <span class="highlighted">Foto's</span></h1>
 		</div>
 		<div v-for="(photo, index) of photos" :key="index" :class="'slide ' + determineClass(index)" :style="'background-image: url(\'' + photo.picture + '\');'"></div>
 
@@ -12,8 +13,11 @@
 
 <script>
 	 import getPhotos from '../../graphql/GetPhotos.graphql';
+	 import getFwosPhotos from '../../graphql/GetFwosPhotos.graphql';
+
     export default {
         name: "PhotoBanner",
+	     props: ["fwos"],
 	     data() {
             return {
                 photos: [],
@@ -37,9 +41,13 @@
 	     },
 	     async mounted() {
             await this.$apollo.query({
-	             query: getPhotos
+	             query: this.fwos? getFwosPhotos : getPhotos
             }).then(response => {
-                this.photos = response.data.photos;
+                if (this.fwos) {
+                    this.photos = response.data.fwosPhotos;
+                } else {
+                    this.photos = response.data.photos;
+                }
             }).catch(error => {
                 console.error(error);
             })
@@ -48,12 +56,49 @@
 </script>
 
 <style lang="scss" scoped>
-	#photo-banner {
+	#photo-banner, #fwos-photo-banner {
 		width: 100%;
 		height: 100vh;
 		overflow: hidden;
 		padding: 0;
 		position: relative;
+	}
+
+	#photo-banner {
+		& .slide {
+			&.first {
+				background-image: url('../../../public/images/woonkamerTafel1.jpg');
+				text-align: right;
+
+				& h1 {
+					right: 0;
+					margin-right: 20%;
+					top: 70%;
+				}
+			}
+		}
+	}
+
+	#fwos-photo-banner {
+		& .slide {
+			&.first {
+				background-image: url('../../../public/images/borden3.jpg');
+				text-align: center;
+				width: 100%;
+				height: 100%;
+
+				& h1 {
+					position: absolute;
+					top: 50%;
+					left: 50%;
+					-webkit-transform: translate(-50%, -50%);
+					-moz-transform: translate(-50%, -50%);
+					-ms-transform: translate(-50%, -50%);
+					-o-transform: translate(-50%, -50%);
+					transform: translate(-50%, -50%);
+				}
+			}
+		}
 	}
 
 	.slide {
@@ -64,24 +109,18 @@
 		background-position: center;
 		background-size: cover;
 		position: absolute;
+		transition: left 1s ease;
 
 		&.first {
-			background-image: url('../../../public/images/woonkamerTafel1.jpg');
-			text-align: right;
-
 			& h1 {
-				right: 0;
-				margin-right: 20%;
 				color: white;
 				position: absolute;
-				top: 70%;
 				/*-webkit-transform: translateY(-50%);
 				-moz-transform: translateY(-50%);
 				-ms-transform: translateY(-50%);
 				-o-transform: translateY(-50%);
 				transform: translateY(-50%); */
-				
-				
+
 				& .highlighted {
 					color: var(--my-yellow);
 				}
@@ -98,6 +137,7 @@
 		-moz-transform: translateY(-50%);
 		-ms-transform: translateY(-50%);
 		-o-transform: translateY(-50%);
+		text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 	}
 
 	.right {
@@ -110,6 +150,7 @@
 		-ms-transform: translateY(-50%);
 		-o-transform: translateY(-50%);
 		transform: translateY(-50%);
+		text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 	}
 
 	i {
@@ -123,7 +164,7 @@
 	}
 
 	.left-photo {
-		right: 101%;
+		left: -100%;
 	}
 
 	.middle-photo {
@@ -131,16 +172,14 @@
 	}
 
 	.right-photo {
-		left: 101%;
+		left: 100%;
 	}
 
 	.hidden-left {
 		left: -200%;
-		visibility: hidden;
 	}
 
 	.hidden-right {
-		right: 200%;
-		visibility: hidden;
+		left: 200%;
 	}
 </style>

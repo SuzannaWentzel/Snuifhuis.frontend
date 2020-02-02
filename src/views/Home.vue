@@ -14,12 +14,13 @@
       </div>
 
       <div class="nav-block">
-        <router-link to="/" title="Food Wall of Shame">FWOS</router-link>
+        <a href="#quote-banner">QUOTES</a>
       </div>
 
       <div class="nav-block">
-        <router-link to="/">TITELS</router-link>
+        <a href="#fwos-photo-banner" title="Food Wall of Shame">FWOS</a>
       </div>
+
       <!--<div class="burger">-->
         <!--<i class="fas fa-hamburger" @click="showNav()"></i>-->
       <!--</div>-->
@@ -37,29 +38,36 @@
     <FrontBanner/>
     <BewonerBanner/>
     <PhotoBanner/>
+    <QuoteBanner />
+    <PhotoBanner :fwos="true"/>
+    <Footer/>
+
   </div>
 </template>
 
 <script>
   // @ is an alias to /src
-  import FrontBanner from "../components/frontpage/FrontBanner";
+  import FrontBanner from "@/components/frontpage/FrontBanner";
   import BewonerBanner from "./BewonerBanner";
-  import { GC_USER_ID, GC_AUTH_TOKEN } from '../constants/settings'
-  import PhotoBanner from "../components/frontpage/PhotoBanner";
-  import { onLogout } from "../vue-apollo";
+  import PhotoBanner from "@/components/frontpage/PhotoBanner";
+  import Footer from '@/components/frontpage/Footer';
+  import QuoteBanner from '@/components/frontpage/QuoteBanner';
+  import { onLogout } from "@/vue-apollo";
 
 
   export default {
   name: "home",
   components: {
+    QuoteBanner,
     PhotoBanner,
     BewonerBanner,
-    FrontBanner
+    FrontBanner,
+    Footer
   },
-  data () {
+  data() {
     return {
       userId: localStorage.getItem('userId'),
-    }
+    };
   },
   methods: {
     showNav() {
@@ -77,6 +85,7 @@
     },
     async logout() {
       await onLogout(this.$apollo.getClient());
+      this.userId = null;
     },
   },
   computed: {
@@ -110,24 +119,25 @@
     }
 
     let stickyNav = function(){
-      let bewonerbanner = document.getElementById('bewoner_banner');
-      let photosbanner = document.getElementById('photo-banner');
+      let bewonerbanner = document.getElementById("bewoner_banner");
+      let photosbanner = document.getElementById("photo-banner");
+      let quoteBanner = document.getElementById("quote-banner");
+      let fwosBanner = document.getElementById("fwos-photo-banner");
       let bewonerTop = bewonerbanner.offsetTop;
       let photosTop = photosbanner.offsetTop;
+      let quoteTop = quoteBanner.offsetTop;
+      let fwosTop = fwosBanner.offsetTop;
       let nav = document.getElementById('nav');
 
       let scrollTop = window.scrollY;
-      console.log(scrollTop);
-      console.log(bewonerTop);
 
-      if (scrollTop >= (bewonerTop - 100) && scrollTop <= (photosTop -100)){
+      if ((scrollTop >= (bewonerTop - 50) && scrollTop <= (photosTop - 50)) || (scrollTop >= (quoteTop - 50) && scrollTop <= (fwosTop - 50))){
         makeDark();
       } else {
         removeDark();
       }
 
       if (scrollTop > stickyNavTop) {
-        console.log(nav.classList)
         nav.classList.add('sticky');
       } else {
         nav.classList.remove('sticky');
@@ -251,10 +261,10 @@
       }
 
       &.not-white {
-        border: 1px #2E0E02 !important;
-        -webkit-border-radius: 2px;
-        -moz-border-radius: 2px;
-        border-radius: 2px;
+        /*border: 2px #2E0E02 solid !important;*/
+        /*-webkit-border-radius: 2px;*/
+        /*-moz-border-radius: 2px;*/
+        /*border-radius: 2px;*/
       }
     }
 
@@ -278,7 +288,15 @@
       margin-top: -5px;
 
       &.not-white {
-        color: #2E0E02 !important;
+        color: #2E0E02;
+
+        &:hover {
+          color: black;
+        }
+      }
+
+      &:hover {
+        color: var(--gray-100);
       }
     }
 

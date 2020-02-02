@@ -1,13 +1,13 @@
 <template>
     <div class="card">
-        <img src="../../public/images/me.jpeg" alt="foto van Suzanna" class="card_image">
-        <b-container fluid class="bewoner_info">
+        <div :style="'background-image: url(\'' + bewoner.profilePicture.picture + '\');'" alt="profielfoto" class="card-image"></div>
+        <b-container fluid class="bewoner-info">
             <b-row>
                 <b-col cols="5" class="label">
                     <p>Naam:</p>
                 </b-col>
                 <b-col cols="7" class="name">
-                    <p>{{name}}</p>
+                    <p>{{ bewoner.name }}</p>
                 </b-col>
             </b-row>
             <b-row v-if="!descriptionNotShown">
@@ -15,7 +15,7 @@
                     <p>Beschrijving:</p>
                 </b-col>
                 <b-col cols="7">
-                    <p>{{ description }}</p>
+                    <p>{{ bewoner.description }}</p>
                 </b-col>
             </b-row>
         </b-container>
@@ -24,14 +24,18 @@
 <script>
     export default {
         name: 'BewonerCard',
-        props: ['name', 'description', 'descriptionNotShown'],
+        props: ['bewoner', 'descriptionNotShown'],
+        mounted() {
+            console.log(this.bewoner);
+        }
     }
 </script>
 <style lang="scss" scoped>
 
     @media screen and (max-width: 600px) {
-        .card_image {
+        .card-image {
             width: 100%;
+            height: 60%;
         }
 
         .card {
@@ -48,12 +52,13 @@
             overflow: hidden;
         }
 
-        .card_image {
+        .card-image {
             width: 100%;
+            height: 50%;
         }
     }
 
-    .bewoner_info {
+    .bewoner-info {
         text-align: left;
         padding: 1.5em;
     }
@@ -65,6 +70,12 @@
     .name {
         font-weight: 600;
         color: var(--my-blue);
+    }
+
+    .card-image {
+        background-position: center;
+        background-size: cover;
+        background-repeat: no-repeat;
     }
 
 </style>
