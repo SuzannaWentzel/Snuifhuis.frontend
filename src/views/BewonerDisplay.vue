@@ -1,7 +1,7 @@
 <template>
     <div class="bewoner_card_display wrapper">
         <div v-for="(bewoner, index) of bewoners" :key="bewoner.name" :class="'bewoner-card ' + determineClass(index)" @click="slide(index)">
-            <BewonerCard :name="bewoner.name" :description="bewoner.description" />
+            <BewonerCard :bewoner="bewoner" />
         <!--<BewonerCard @click="showPrevious" class="left-card left" v-if="currentBewoner > 0" :name="bewoners[currentBewoner-1].name" :description="bewoners[currentBewoner-1].description" :descriptionNotShown="true"/>-->
         <!--<BewonerCard class="middle-card" :name="bewoners[currentBewoner].name" :description="bewoners[currentBewoner].description"/>-->
         <!--<BewonerCard @click="showNext" class="right-card right" v-if="currentBewoner < bewoners.length -1" :name="bewoners[currentBewoner + 1].name" :description="bewoners[currentBewoner + 1].description" :descriptionNotShown="true"/>-->
